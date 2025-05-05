@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Rotating Image Animation with Persistence</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  #main-container {
+    background: #fff;
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.2);
+    width: 320px;
+    max-width: 95vw;
+    height: 550px;
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    user-select: none;
+  }
+  h1 {
+    margin-bottom: 1rem;
+    color: #222222;
+    font-weight: 600;
+    font-size: 1.8rem;
+  }
+  .rotating-image {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 6px solid #66a6ff;
+    box-shadow: 0 12px 30px rgba(102, 166, 255, 0.7);
+    object-fit: cover;
+    transition: box-shadow 0.3s ease;
+  }
+  .rotating-image.rotating {
+    animation: spin 1.5s ease-in-out forwards;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg);}
+    to { transform: rotate(360deg);}
+  }
+  #animate-btn {
+    margin-top: 24px;
+    background: #335dff;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 1.2rem;
+    padding: 14px 34px;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(51,93,255,0.6);
+    transition: background-color 0.35s ease, transform 0.2s ease;
+  }
+  #animate-btn:hover {
+    background: #243fcc;
+    transform: scale(1.05);
+  }
+  #animate-btn:active {
+    transform: scale(0.95);
+  }
+  #animation-info {
+    margin-top: 18px;
+    font-size: 1rem;
+    color: #333333cc;
+    min-height: 22px;
+  }
+  @media (max-width: 400px) {
+    #main-container {
+      width: 90vw;
+      height: auto;
+      padding: 16px;
+    }
+    h1 {
+      font-size: 1.5rem;
+    }
+    .rotating-image {
+      width: 140px;
+      height: 140px;
+      border-width: 4px;
+    }
+    #animate-btn {
+      font-size: 1rem;
+      padding: 10px 24px;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="main-container" role="main" aria-label="Rotating Image Animation with Persistence">
+  <h1>Spin the Image & Save Your Actions</h1>
+  <img src="https://images.pexels.com/photos/414612/pexels-photo-414612.jpeg" alt="Beautiful nature" id="rotatingImage" class="rotating-image" aria-live="polite" />
+  <button id="animate-btn" aria-live="polite" aria-pressed="false">Click to Spin</button>
+  <div id="animation-info" aria-atomic="true"></div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'spinAnimationCount';
+  const btn = document.getElementById('animate-btn');
+  const img = document.getElementById('rotatingImage');
+  const info = document.getElementById('animation-info');
+
+  function updateInfo(count) {
+    if (count === 0) {
+      info.textContent = 'You have not spun the image yet.';
+    } else if (count === 1) {
+      info.textContent = 'You have spun the image 1 time.';
+    } else {
+      info.textContent = `You have spun the image ${count} times.`;
+    }
+  }
+
+  function loadCount() {
+    const val = localStorage.getItem(STORAGE_KEY);
+    if (val && !isNaN(val)) {
+      return parseInt(val, 10);
+    }
+    return 0;
+  }
+
+  function saveCount(count) {
+    localStorage.setItem(STORAGE_KEY, count);
+  }
+
+  function spinImage() {
+    let count = loadCount();
+    count++;
+    saveCount(count);
+    updateInfo(count);
+
+    btn.setAttribute('aria-pressed', 'true');
+    img.classList.add('rotating');
+
+    // Remove class after animation completes
+    img.addEventListener('animationend', () => {
+      img.classList.remove('rotating');
+      btn.setAttribute('aria-pressed', 'false');
+    }, { once: true });
+  }
+
+  // Initialize UI on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    const count = loadCount();
+    updateInfo(count);
+  });
+
+  btn.addEventListener('click', spinImage);
+</script>
+</body>
+</html>
+
